@@ -1,18 +1,15 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router'
+import { AuthRoutes } from 'src/router/auth/index'
+import { HomeRoutes } from 'src/router/home/index'
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
-  },
+const routes: RouteRecordRaw[] = []
 
-  // Always leave this as last one,
-  // but you can also remove it
-  {
-    path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
-  },
-];
+routes.push(...AuthRoutes)
+routes.push(...HomeRoutes)
 
-export default routes;
+routes.push({
+  path: '/:catchAll(.*)*',
+  component: () => import('pages/ErrorNotFound.vue'),
+})
+
+export default routes
