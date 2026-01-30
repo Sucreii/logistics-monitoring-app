@@ -1,75 +1,61 @@
-import { defineStore } from 'pinia'
-import { useCookies } from '@vueuse/integrations/useCookies'
-import { HTTP_API } from 'src/boot/axios'
-import { useRouter } from 'vue-router'
-import CryptoJS from 'crypto-js' 
+import { defineStore } from 'pinia';
+import { Cookies } from 'quasar';
+import { HTTP_API } from 'src/boot/axios';
 
-const SECRET_KEY = '123-123-123'
+type CredentialsType = {
+  username: string;
+  password: string;
+};
 
-export const useAuthStore = defineStore('authStore', () => {
-  type CredentialsType = {
-    username: string
-    password: string
-  }
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    username: Cookies.get('username') || (null as string | null),
+    role: Cookies.get('role') || null,
+    loading: false,
+  }),
 
-  const cookies = useCookies()
-  const router = useRouter();
-  const encrypt = (data: string) => {
-    return CryptoJS.AES.encrypt(data, SECRET_KEY).toString()
-  }
+  getters: {
+    isAuthenticated: (state) => !!state.username,
+    roleLabel: (state) => {
+      const roles: Record<number, string> = {
+        1: 'Super Admin',
+        2: 'Admin',
+        3: 'Worker',
+        4: 'Viewer',
+      };
 
-  const decrypt = (data: string) => {
-    const bytes = CryptoJS.AES.decrypt(data, SECRET_KEY)
-    return bytes.toString(CryptoJS.enc.Utf8)
-  }
+      return roles[Number(state.role)] || 'Unknown Role';
+    },
+  },
 
-  const getUserFromCookie = () => {
-    const encryptedUser = cookies.get('user')
-    if (encryptedUser) {
+  actions: {
+    async login(payload: CredentialsType) {
+      this.loading = true;
       try {
-        return JSON.parse(decrypt(encryptedUser))
+        const response = await HTTP_API().post('/auth/login', payload);
+        this.username = response.data.user;
+        this.role = response.data.user.role;
+        console.log('I AM LOGIN: ', response.data.user.first_name);
+
+        Cookies.set('username', this.username as string, { path: '/', expires: 7 });
+        Cookies.set('role', this.role as string, { path: '/', expires: 7 });
+
+        return response.data;
       } catch (err) {
-        console.error('Failed to decrypt user data:', err)
+        console.error('Login Error:', err);
+        throw err;
+      } finally {
+        this.loading = false;
       }
-    }
-    return null
-  }
+    },
 
-  const user = getUserFromCookie()
+    async logout() {
+      this.username = null;
+      this.role = null;
+      Cookies.remove('username');
+      Cookies.remove('role');
 
-  const login = async (payload: CredentialsType) => {
-    try {
-      const response = await HTTP_API().post('/api/auth/login', payload)
-      if (response.data?.results) {
-        const userData = response.data.results
-        cookies.set('user', encrypt(JSON.stringify(userData)), {
-          secure: true,
-        })
-      }
-      return response.data
-    } catch (err) {
-      console.error('Login Error:', err)
-      throw new Error('Login failed. Please try again.')
-    }
-  }
-
-  const logout = async () => {
-    try {
-      const response = await HTTP_API().get('/api/auth/logout')
-      console.log('response', response)
-
-      if (response.status === 200) {
-        cookies.remove('user')
-        await router.replace({ name: 'auth.page' })
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  return {
-    login,
-    logout,
-    user,
-  }
-})
+      await this.router.push({ name: 'auth.page' });
+    },
+  },
+});

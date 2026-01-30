@@ -1,46 +1,31 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 export const HomeRoutes: RouteRecordRaw[] = [
   {
-    path: '/home',
+    path: '/',
     component: () => import('src/components/LeftDrawer.vue'),
-    redirect: { name: 'home.layout' },
+    meta: { requiresAuth: true },
     children: [
       {
-        path: '',
+        path: '/dashboard',
         name: 'home.dashboard',
         component: () => import('src/pages/HomePage.vue'),
       },
-      // {
-      //   path: '/order-list',
-      //   name: 'home.order-list',
-      //   component: () => import('src/modules/home/pages/order-list.vue'),
-      // },
-      // {
-      //   path: '/shipment-list',
-      //   name: 'home.shipment-list',
-      //   component: () => import('src/modules/home/pages/shipment-list.vue'),
-      // },
-      // {
-      //   path: '/reports',
-      //   name: 'home.reports',
-      //   component: () => import('src/modules/home/pages/reports.vue'),
-      // },
-      // {
-      //   path: '/notifications',
-      //   name: 'home.notifications',
-      //   component: () => import('src/modules/home/pages/notification.vue'),
-      // },
-      // {
-      //   path: '/add-user',
-      //   name: 'home.add-user',
-      //   component: () => import('src/modules/home/pages/add-user.vue'),
-      // },
-      // {
-      //   path: '/modify-user',
-      //   name: 'home.modify-user',
-      //   component: () => import('src/modules/home/pages/modify-users.vue'),
-      // },
+      {
+        path: '/shipments',
+        name: 'home.shipments',
+        component: () => import('src/pages/ForShipments.vue'),
+      },
+      {
+        path: '/trips',
+        name: 'home.trips',
+        component: () => import('src/pages/ForTrips.vue'),
+      },
+      {
+        path: '/users',
+        name: 'home.users',
+        component: () => import('src/pages/ForUsers.vue'),
+      },
     ],
   },
-]
+];

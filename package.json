@@ -15,12 +15,16 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
+    "@apollo/client": "^3.14.0",
     "@quasar/extras": "^1.16.4",
+    "@vue/apollo-composable": "^4.2.2",
     "@vueuse/integrations": "^14.1.0",
     "axios": "^1.2.1",
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
     "crypto-js": "^4.2.0",
+    "gql-tag": "^1.0.1",
+    "graphql": "^16.12.0",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
     "universal-cookie": "^8.0.1",
